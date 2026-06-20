@@ -89,7 +89,8 @@ export interface ModelMetrics {
 }
 
 export interface EventData {
-  id: string | number
+  id?: string | number
+  event_id?: string | number
   event_cause: string
   corridor: string
   zone: string
