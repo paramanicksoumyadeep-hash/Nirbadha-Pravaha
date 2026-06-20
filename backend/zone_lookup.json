@@ -1,0 +1,134 @@
+{
+  "Central Zone 1": {
+    "lat": 12.9715567,
+    "lon": 77.626261,
+    "event_count": 269,
+    "top_corridors": [
+      "Old Madras Road",
+      "Non-corridor",
+      "Mysore Road",
+      "Hosur Road",
+      "Old Airport Road"
+    ]
+  },
+  "Central Zone 2": {
+    "lat": 12.974705,
+    "lon": 77.58461258,
+    "event_count": 623,
+    "top_corridors": [
+      "Non-corridor",
+      "Mysore Road",
+      "Bellary Road 1",
+      "CBD 2",
+      "Magadi Road"
+    ]
+  },
+  "East Zone 1": {
+    "lat": 12.9562685,
+    "lon": 77.701326,
+    "event_count": 253,
+    "top_corridors": [
+      "Non-corridor",
+      "ORR East 1",
+      "ORR East 2",
+      "Varthur Road",
+      "Old Airport Road"
+    ]
+  },
+  "East Zone 2": {
+    "lat": 13.0120128,
+    "lon": 77.67942325,
+    "event_count": 190,
+    "top_corridors": [
+      "Non-corridor",
+      "ORR North 1",
+      "ORR East 2",
+      "Old Airport Road",
+      "Airport New South Road"
+    ]
+  },
+  "North Zone 1": {
+    "lat": 13.042119249999999,
+    "lon": 77.6118479,
+    "event_count": 318,
+    "top_corridors": [
+      "ORR North 1",
+      "Non-corridor",
+      "Bellary Road 2",
+      "Airport New South Road",
+      "Bellary Road 1"
+    ]
+  },
+  "North Zone 2": {
+    "lat": 13.0454727,
+    "lon": 77.58612,
+    "event_count": 413,
+    "top_corridors": [
+      "Bellary Road 2",
+      "Bellary Road 1",
+      "Non-corridor",
+      "ORR North 2",
+      "Tumkur Road"
+    ]
+  },
+  "South Zone 1": {
+    "lat": 12.9093833,
+    "lon": 77.5887084,
+    "event_count": 233,
+    "top_corridors": [
+      "Non-corridor",
+      "Bannerghata Road",
+      "ORR West 1",
+      "Hosur Road",
+      "ORR North 2"
+    ]
+  },
+  "South Zone 2": {
+    "lat": 12.9165052,
+    "lon": 77.62072615,
+    "event_count": 354,
+    "top_corridors": [
+      "Hosur Road",
+      "Non-corridor",
+      "Bannerghata Road",
+      "IRR(Thanisandra road)",
+      "ORR East 1"
+    ]
+  },
+  "West Zone 1": {
+    "lat": 12.9902533,
+    "lon": 77.5193327,
+    "event_count": 433,
+    "top_corridors": [
+      "Non-corridor",
+      "Tumkur Road",
+      "Mysore Road",
+      "Magadi Road",
+      "West of Chord Road"
+    ]
+  },
+  "West Zone 2": {
+    "lat": 12.998584950000001,
+    "lon": 77.55682455,
+    "event_count": 358,
+    "top_corridors": [
+      "Bellary Road 1",
+      "Non-corridor",
+      "West of Chord Road",
+      "Mysore Road",
+      "Tumkur Road"
+    ]
+  },
+  "unknown": {
+    "lat": 12.983856,
+    "lon": 77.5892476,
+    "event_count": 4729,
+    "top_corridors": [
+      "Non-corridor",
+      "Mysore Road",
+      "Bellary Road 1",
+      "Tumkur Road",
+      "Bellary Road 2"
+    ]
+  }
+}

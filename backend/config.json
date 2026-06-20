@@ -1,0 +1,25 @@
+{
+  "BEST_THRESHOLD": 0.65,
+  "SEVERITY_TIERS": {
+    "HIGH": { "closure_proba_min": 0.65, "duration_min_threshold": 150 },
+    "MEDIUM": { "closure_proba_min": 0.35, "duration_min_threshold": 75 }
+  },
+  "MANPOWER": { "LOW": 1, "MEDIUM": 2, "HIGH": 4 },
+  "BARRICADE_UNITS": { "LOW": 0, "MEDIUM": 1, "HIGH": 4, "HIGH_CLOSURE_MEDIUM": 2 },
+  "PEAK_HOUR_BONUS": 1,
+  "CROWD_EVENT_BONUS": 2,
+  "CROWD_CAUSES": ["public_event", "procession", "vip_movement", "protest"],
+  "EVENT_CAUSES": ["vehicle_breakdown", "pothole", "procession", "water_logging", "public_event", "protest", "tree_fall", "vip_movement", "accident", "construction", "others"],
+  "VEH_TYPES": ["heavy_vehicle", "lcv", "two_wheeler", "bus", "unknown"],
+  "N_GEO_CLUSTERS": 25,
+  "RANDOM_STATE": 42,
+  "N_ESTIMATORS_CLOSURE": 300,
+  "MAX_DEPTH_CLOSURE": 6,
+  "LEARNING_RATE_CLOSURE": 0.03,
+  "SUBSAMPLE_CLOSURE": 0.85,
+  "COLSAMPLE_BYTREE_CLOSURE": 0.85,
+  "N_ESTIMATORS_DURATION": 400,
+  "MAX_DEPTH_DURATION": 10,
+  "N_SPLITS_CV": 5,
+  "N_SPLITS_OOF": 5
+}

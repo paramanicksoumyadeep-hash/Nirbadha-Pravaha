@@ -1,0 +1,134 @@
+{
+  "Airport New South Road": {
+    "lat": 13.029057,
+    "lon": 77.6323212,
+    "zone": "North Zone 1",
+    "police_station": "Hennuru"
+  },
+  "Bannerghata Road": {
+    "lat": 12.8998101,
+    "lon": 77.5999341,
+    "zone": "South Zone 2",
+    "police_station": "Mico Layout"
+  },
+  "Bellary Road 1": {
+    "lat": 13.0146674,
+    "lon": 77.58484755,
+    "zone": "North Zone 2",
+    "police_station": "Sadashivanagar"
+  },
+  "Bellary Road 2": {
+    "lat": 13.0986024,
+    "lon": 77.598857,
+    "zone": "North Zone 2",
+    "police_station": "Yelahanka"
+  },
+  "CBD 1": {
+    "lat": 12.9808082,
+    "lon": 77.6074055,
+    "zone": "Central Zone 2",
+    "police_station": "Shivajinagar"
+  },
+  "CBD 2": {
+    "lat": 12.983084049999999,
+    "lon": 77.59662495,
+    "zone": "Central Zone 2",
+    "police_station": "Cubbon Park"
+  },
+  "Hennur Main Road": {
+    "lat": 13.041338249999999,
+    "lon": 77.62492585000001,
+    "zone": "North Zone 1",
+    "police_station": "Hennuru"
+  },
+  "Hosur Road": {
+    "lat": 12.9195903,
+    "lon": 77.62151575,
+    "zone": "South Zone 2",
+    "police_station": "Madiwala"
+  },
+  "IRR(Thanisandra road)": {
+    "lat": 12.9280618,
+    "lon": 77.6214437,
+    "zone": "South Zone 2",
+    "police_station": "Adugodi"
+  },
+  "Magadi Road": {
+    "lat": 12.9874487,
+    "lon": 77.5190005,
+    "zone": "West Zone 1",
+    "police_station": "Kamakshipalya"
+  },
+  "Mysore Road": {
+    "lat": 12.9620105,
+    "lon": 77.566492,
+    "zone": "Central Zone 2",
+    "police_station": "Halasuru Gate"
+  },
+  "Non-corridor": {
+    "lat": 12.98071455,
+    "lon": 77.5868232,
+    "zone": "Central Zone 2",
+    "police_station": "No Police Station"
+  },
+  "ORR East 1": {
+    "lat": 12.92644525,
+    "lon": 77.6778278,
+    "zone": "East Zone 1",
+    "police_station": "HAL Old Airport"
+  },
+  "ORR East 2": {
+    "lat": 12.9695205,
+    "lon": 77.700601,
+    "zone": "East Zone 1",
+    "police_station": "HAL Old Airport"
+  },
+  "ORR North 1": {
+    "lat": 13.0267071,
+    "lon": 77.6307164,
+    "zone": "North Zone 1",
+    "police_station": "Banaswadi"
+  },
+  "ORR North 2": {
+    "lat": 13.0435974,
+    "lon": 77.5538975,
+    "zone": "North Zone 2",
+    "police_station": "Jalahalli"
+  },
+  "ORR West 1": {
+    "lat": 12.91551235,
+    "lon": 77.5649978,
+    "zone": "South Zone 1",
+    "police_station": "Banashankari"
+  },
+  "Old Airport Road": {
+    "lat": 12.9592718,
+    "lon": 77.6548567,
+    "zone": "Central Zone 1",
+    "police_station": "Jeevanbheemanagar"
+  },
+  "Old Madras Road": {
+    "lat": 12.9791717,
+    "lon": 77.628747,
+    "zone": "Central Zone 1",
+    "police_station": "Banaswadi"
+  },
+  "Tumkur Road": {
+    "lat": 13.032013105,
+    "lon": 77.53472425000001,
+    "zone": "West Zone 1",
+    "police_station": "Yeshwanthpura"
+  },
+  "Varthur Road": {
+    "lat": 12.9563017,
+    "lon": 77.7148996,
+    "zone": "East Zone 1",
+    "police_station": "HAL Old Airport"
+  },
+  "West of Chord Road": {
+    "lat": 12.984894149999999,
+    "lon": 77.54903645,
+    "zone": "West Zone 2",
+    "police_station": "Vijayanagara"
+  }
+}
