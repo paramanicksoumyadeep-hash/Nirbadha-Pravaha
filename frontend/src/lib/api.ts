@@ -7,8 +7,7 @@ const api = axios.create({
   },
 })
 
-// ─── Request / Response Types ─────────────────────────────────────────────────
-
+// Request / Response Types
 export interface PredictRequest {
   latitude: number
   longitude: number
@@ -123,8 +122,7 @@ export interface FeedbackData {
   notes?: string
 }
 
-// ─── API Functions ─────────────────────────────────────────────────────────────
-
+// API Functions
 export const predictEvent = (req: PredictRequest): Promise<PredictionResponse> =>
   api.post('/api/predict', req).then((r) => r.data)
 

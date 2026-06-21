@@ -1,6 +1,6 @@
 """
 main.py
--------
+
 FastAPI application for the Nirbadha Pravaha traffic command center.
 Flipkart Grid 7.0 Hackathon — Traffic Intelligence Layer.
 
@@ -22,6 +22,8 @@ import os
 import subprocess
 import sys
 import urllib.parse
+from dotenv import load_dotenv
+load_dotenv()
 from pymongo import MongoClient
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -37,9 +39,8 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-# ---------------------------------------------------------------------------
 # Paths
-# ---------------------------------------------------------------------------
+
 BACKEND_DIR = Path(__file__).parent.resolve()
 MODELS_DIR = BACKEND_DIR / "models"
 DATA_DIR = BACKEND_DIR / "data"
@@ -52,19 +53,17 @@ METRICS_PATH = MODELS_DIR / "metrics.json"
 CORRIDOR_LOOKUP_PATH = BACKEND_DIR / "corridor_lookup.json"
 EVENTS_SNAPSHOT_PATH = DATA_DIR / "events.json"
 
-# ---------------------------------------------------------------------------
 # MongoDB setup
-# ---------------------------------------------------------------------------
+
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 try:
-    mongo_client = MongoClient(MONGO_URI)
+    mongo_client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=2000)
     db = mongo_client.nirbadha_pravaha
 except Exception as e:
     print(f"Failed to connect to MongoDB: {e}")
 
-# ---------------------------------------------------------------------------
 # Haversine distance
-# ---------------------------------------------------------------------------
+
 def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     R = 6371.0 # Earth radius in kilometers
     phi1 = math.radians(lat1)
@@ -75,9 +74,8 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     return R * c
 
-# ---------------------------------------------------------------------------
 # App state
-# ---------------------------------------------------------------------------
+
 class AppState:
     closure_model = None
     duration_model = None
@@ -90,13 +88,10 @@ class AppState:
     events_df: Optional[pd.DataFrame] = None
     models_loaded: bool = False
 
-
 STATE = AppState()
 
-
-# ---------------------------------------------------------------------------
 # Pydantic schemas
-# ---------------------------------------------------------------------------
+
 class PredictRequest(BaseModel):
     latitude: float = Field(..., ge=-90, le=90, description="Latitude of the event")
     longitude: float = Field(..., ge=-180, le=180, description="Longitude of the event")
@@ -108,12 +103,10 @@ class PredictRequest(BaseModel):
     description: str = Field(default="", description="Free-text description of the event")
     has_junction: bool = Field(default=False, description="Whether the event is at a junction")
 
-
 class FeatureExplanation(BaseModel):
     name: str
     importance: float
     value: float
-
 
 class NearbyRoad(BaseModel):
     name: str
@@ -121,7 +114,6 @@ class NearbyRoad(BaseModel):
     longitude: float
     distance_km: float
     risk_level: str
-
 
 class PredictionResponse(BaseModel):
     requires_road_closure_probability: float
@@ -139,21 +131,17 @@ class PredictionResponse(BaseModel):
     derived_police_station: str
     nearby_roads: List[NearbyRoad] = []
 
-
 class FeedbackRequest(BaseModel):
     actual_requires_closure: Optional[bool] = None
     actual_duration_min: Optional[float] = None
     notes: str = ""
 
-
 class FeedbackResponse(BaseModel):
     status: str
     feedback_id: int
 
-
-# ---------------------------------------------------------------------------
 # DB helpers
-# ---------------------------------------------------------------------------
+
 def _init_db() -> None:
     """Initialize MongoDB collections if necessary."""
     try:
@@ -192,10 +180,8 @@ def _populate_db_from_snapshot() -> None:
     except Exception as e:
         print(f"Failed to populate DB: {e}")
 
-
-# ---------------------------------------------------------------------------
 # Model loading
-# ---------------------------------------------------------------------------
+
 def _run_training() -> None:
     """Invoke train.py as a subprocess."""
     print("[main] Running train.py …")
@@ -207,7 +193,6 @@ def _run_training() -> None:
     if result.returncode != 0:
         raise RuntimeError("train.py failed. Check logs above.")
     print("[main] train.py completed successfully.")
-
 
 def _load_models() -> None:
     """Load all model artefacts into STATE."""
@@ -240,10 +225,8 @@ def _load_models() -> None:
     STATE.models_loaded = True
     print("[main] All models loaded successfully.")
 
-
-# ---------------------------------------------------------------------------
 # Geo-derivation helpers
-# ---------------------------------------------------------------------------
+
 def _derive_corridor_zone_ps(lat: float, lon: float) -> tuple[str, str, str]:
     """
     Nearest-neighbour lookup in corridor_lookup.json.
@@ -296,10 +279,8 @@ def _calculate_nearby_roads(lat: float, lon: float, limit: int = 5) -> List[Near
     roads.sort(key=lambda x: x.distance_km)
     return roads[:limit]
 
-
-# ---------------------------------------------------------------------------
 # Prediction helper
-# ---------------------------------------------------------------------------
+
 def _build_applied_rules(
     event_cause: str,
     closure_proba: float,
@@ -339,10 +320,8 @@ def _build_applied_rules(
     rules.append(f"Final severity tier: {severity_tier}")
     return rules
 
-
-# ---------------------------------------------------------------------------
 # Lifespan
-# ---------------------------------------------------------------------------
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup / shutdown logic."""
@@ -358,10 +337,8 @@ async def lifespan(app: FastAPI):
     # Shutdown — nothing special needed
     print("[main] Shutting down.")
 
-
-# ---------------------------------------------------------------------------
 # App
-# ---------------------------------------------------------------------------
+
 app = FastAPI(
     title="Nirbadha Pravaha — Traffic Command Center API",
     description=(
@@ -380,12 +357,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# ---------------------------------------------------------------------------
 # Routes
-# ---------------------------------------------------------------------------
 
-# ── Health ─────────────────────────────────────────────────────────────────
+# Health
 @app.get("/api/health", tags=["System"])
 def health_check() -> Dict[str, Any]:
     """Return service health status."""
@@ -397,21 +371,18 @@ def health_check() -> Dict[str, Any]:
         "version": "1.0.0",
     }
 
-
-# ── Config ─────────────────────────────────────────────────────────────────
+# Config
 @app.get("/api/config", tags=["System"])
 def get_config() -> Dict[str, Any]:
     """Return the active configuration."""
     return STATE.config
 
-
-# ── Geospatial ─────────────────────────────────────────────────────────────
+# Geospatial
 @app.get("/api/nearby-roads", response_model=List[NearbyRoad], tags=["Geospatial"])
 def get_nearby_roads_api(lat: float, lon: float, limit: int = 5):
     return _calculate_nearby_roads(lat, lon, limit)
 
-
-# ── Predict ────────────────────────────────────────────────────────────────
+# Predict
 @app.post("/api/predict", response_model=PredictionResponse, tags=["Prediction"])
 def predict(req: PredictRequest) -> PredictionResponse:
     """
@@ -530,7 +501,6 @@ def predict(req: PredictRequest) -> PredictionResponse:
         nearby_roads=_calculate_nearby_roads(req.latitude, req.longitude)
     )
 
-
 def _persist_event(
     req: PredictRequest,
     corridor: str,
@@ -565,8 +535,7 @@ def _persist_event(
     except Exception as exc:
         print(f"[main] Warning: could not persist event: {exc}")
 
-
-# ── Events ─────────────────────────────────────────────────────────────────
+# Events
 @app.get("/api/events", tags=["Events"])
 def get_events(
     date_from: Optional[str] = Query(None, description="ISO date filter start (inclusive)"),
@@ -609,8 +578,7 @@ def get_events(
         "events": events,
     }
 
-
-# ── Hotspots ───────────────────────────────────────────────────────────────
+# Hotspots
 @app.get("/api/events/hotspots", tags=["Events"])
 def get_hotspots() -> Dict[str, Any]:
     """
@@ -679,8 +647,7 @@ def get_hotspots() -> Dict[str, Any]:
     hotspots.sort(key=lambda x: x["event_count"], reverse=True)
     return {"hotspots": hotspots, "n_clusters": n_clusters}
 
-
-# ── Metrics ────────────────────────────────────────────────────────────────
+# Metrics
 @app.get("/api/model/metrics", tags=["Model"])
 def get_metrics() -> Dict[str, Any]:
     """Return pre-computed model performance metrics."""
@@ -688,8 +655,7 @@ def get_metrics() -> Dict[str, Any]:
         raise HTTPException(status_code=404, detail="Metrics not available. Run training first.")
     return STATE.metrics
 
-
-# ── Feedback ───────────────────────────────────────────────────────────────
+# Feedback
 @app.post("/api/events/{event_id}/feedback", response_model=FeedbackResponse, tags=["Events"])
 def submit_feedback(event_id: int, body: FeedbackRequest) -> FeedbackResponse:
     """
@@ -717,10 +683,8 @@ def submit_feedback(event_id: int, body: FeedbackRequest) -> FeedbackResponse:
 
     return FeedbackResponse(status="ok", feedback_id=next_id)
 
-
-# ---------------------------------------------------------------------------
 # Entry point
-# ---------------------------------------------------------------------------
+
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",

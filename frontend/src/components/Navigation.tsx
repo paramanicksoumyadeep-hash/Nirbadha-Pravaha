@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Shield, Radio } from 'lucide-react'
+import { Shield, Radio, Moon, Sun } from 'lucide-react'
 import { clsx } from 'clsx'
+import { useTheme } from '../lib/ThemeContext'
 
 const navLinks = [
-  { path: '/', label: 'Home' },
-  { path: '/predict', label: 'Predict' },
-  { path: '/dashboard', label: 'Dashboard' },
-  { path: '/model', label: 'Model' },
+  { path: '/', label: 'Overview' },
+  { path: '/predict', label: 'Report' },
+  { path: '/archive', label: 'Archive' },
+  { path: '/model', label: 'Intelligence' },
   { path: '/about', label: 'About' },
 ]
 
@@ -29,16 +30,16 @@ function LiveClock() {
   }, [])
 
   return (
-    <div className="flex items-center gap-2 text-right">
+    <div className="flex items-center gap-2 text-right border-l border-border pl-4 ml-2">
       <div className="relative">
-        <Radio className="w-4 h-4 text-accent-green" />
-        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-accent-green rounded-full animate-pulse" />
+        <Radio className="w-4 h-4 text-primary" />
+        <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-primary rounded-full animate-pulse" />
       </div>
-      <div>
-        <div className="text-accent-green font-mono text-sm font-semibold tracking-wider">
+      <div className="hidden sm:block">
+        <div className="text-primary font-mono text-xs font-semibold tracking-wider">
           {time}
         </div>
-        <div className="text-text-secondary text-xs">IST LIVE</div>
+        <div className="text-text-secondary text-[10px] uppercase">IST LIVE</div>
       </div>
     </div>
   )
@@ -46,67 +47,82 @@ function LiveClock() {
 
 export default function Navigation() {
   const location = useLocation()
-  const [scrolled, setScrolled] = useState(false)
-
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 10)
-    window.addEventListener('scroll', handler)
-    return () => window.removeEventListener('scroll', handler)
-  }, [])
+  const { theme, toggleTheme } = useTheme()
 
   return (
-    <header
-      className={clsx(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
-        scrolled
-          ? 'bg-surface/95 backdrop-blur-md border-b border-border shadow-lg'
-          : 'bg-surface/80 backdrop-blur-sm border-b border-border/50'
-      )}
-    >
-      <div className="w-full px-4 sm:px-8 xl:px-16">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative">
-              <Shield className="w-8 h-8 text-accent-amber group-hover:text-amber-300 transition-colors" />
-              <div className="absolute inset-0 bg-amber-500/20 rounded-full blur-md group-hover:bg-amber-400/30 transition-all" />
-            </div>
-            <div>
-              <div className="text-text-primary font-bold text-lg leading-tight tracking-tight">
-                Nirbadha Pravaha
+    <header className="fixed top-0 left-0 right-0 z-50 bg-surface border-b border-border transition-colors duration-300">
+      <div className="w-full px-4 sm:px-6">
+        <div className="flex items-center justify-between h-[60px]">
+          
+          {/* Logo & Brand */}
+          <div className="flex items-center gap-8">
+            <Link to="/" className="flex items-center gap-2 group">
+              <div className="text-primary flex items-center justify-center">
+                <Shield className="w-6 h-6 fill-current" />
               </div>
-              <div className="text-text-secondary text-xs leading-tight">
-                Bengaluru Traffic Command
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-text-primary font-bold text-xl tracking-tight">
+                  Nirbadha Pravaha
+                </span>
               </div>
-            </div>
-          </Link>
+            </Link>
 
-          {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => {
-              const isActive = location.pathname === link.path
-              return (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className={clsx(
-                    'relative px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200',
-                    isActive
-                      ? 'text-accent-amber'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
-                  )}
-                >
-                  {link.label}
-                  {isActive && (
-                    <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-accent-amber rounded-full" />
-                  )}
-                </Link>
-              )
-            })}
-          </nav>
+            {/* Nav Links */}
+            <nav className="hidden lg:flex items-center gap-6">
+              {navLinks.map((link) => {
+                const isActive = location.pathname === link.path
+                return (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    className={clsx(
+                      'relative text-sm font-semibold transition-colors py-5',
+                      isActive
+                        ? 'text-text-primary'
+                        : 'text-text-secondary hover:text-text-primary'
+                    )}
+                  >
+                    {link.label}
+                    {isActive && (
+                      <span className="absolute bottom-0 left-0 right-0 h-1 bg-primary rounded-t-sm" />
+                    )}
+                  </Link>
+                )
+              })}
+            </nav>
+          </div>
 
-          {/* Live Clock */}
-          <LiveClock />
+          {/* Right actions */}
+          <div className="flex items-center gap-3 sm:gap-4">
+            
+            <a 
+              href="https://btp.karnataka.gov.in/en" 
+              target="_blank" 
+              rel="noreferrer"
+              className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-full bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/30 transition-colors"
+            >
+              Report Incident
+            </a>
+
+            <a 
+              href="tel:112" 
+              className="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-full bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-500/30 transition-colors"
+            >
+              Call Emergency
+            </a>
+
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-full text-text-secondary hover:text-text-primary hover:bg-background transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
+            <LiveClock />
+          </div>
+
         </div>
       </div>
     </header>

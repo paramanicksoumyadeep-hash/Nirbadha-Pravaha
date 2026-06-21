@@ -1,6 +1,6 @@
 """
 features.py
------------
+
 Feature engineering for the Nirbadha Pravaha traffic command center.
 Provides:
   - FEATURE_COLS  : 26 features used by the closure LightGBM classifier
@@ -19,9 +19,7 @@ import numpy as np
 import pandas as pd
 import pytz
 
-# ---------------------------------------------------------------------------
 # Feature lists
-# ---------------------------------------------------------------------------
 
 # 26 features for the closure classifier
 FEATURE_COLS: List[str] = [
@@ -78,12 +76,9 @@ REG_FEATURES: List[str] = [
     "veh_type_le",
 ]
 
-# ---------------------------------------------------------------------------
 # Internal helpers
-# ---------------------------------------------------------------------------
 
 _IST = pytz.timezone("Asia/Kolkata")
-
 
 def _parse_ist(dt_str: str) -> datetime:
     """Parse an ISO datetime string and return IST-localised datetime."""
@@ -94,16 +89,12 @@ def _parse_ist(dt_str: str) -> datetime:
         dt = dt.astimezone(_IST)
     return dt
 
-
 def _cyclic(value: float, period: float) -> Tuple[float, float]:
     """Return (sin, cos) cyclic encoding for *value* with given *period*."""
     angle = 2.0 * math.pi * value / period
     return math.sin(angle), math.cos(angle)
 
-
-# ---------------------------------------------------------------------------
 # Single-record inference feature engineering
-# ---------------------------------------------------------------------------
 
 def engineer_features(
     raw_input_dict: Dict[str, Any],
@@ -150,7 +141,7 @@ def engineer_features(
     """
     r = raw_input_dict
 
-    # ---- temporal ----
+    # temporal
     dt = _parse_ist(str(r["start_datetime"]))
     hour = dt.hour
     dow = dt.weekday()        # Monday=0
@@ -164,13 +155,13 @@ def engineer_features(
     hour_sin, hour_cos = _cyclic(hour, 24)
     dow_sin, dow_cos = _cyclic(dow, 7)
 
-    # ---- categorical flags ----
+    # categorical flags
     authenticated_flag = 1 if str(r.get("authenticated", "no")).lower() == "yes" else 0
     event_type_flag = 1 if str(r.get("event_type", "unplanned")).lower() == "planned" else 0
     has_junction = int(bool(r.get("has_junction", False)))
     description_len = len(str(r.get("description", "")))
 
-    # ---- geo cluster ----
+    # geo cluster
     lat = float(r.get("latitude", 12.9716))
     lon = float(r.get("longitude", 77.5946))
     try:
@@ -178,7 +169,7 @@ def engineer_features(
     except Exception:
         geo_cluster = -1
 
-    # ---- raw categorical values ----
+    # raw categorical values
     corridor = str(r.get("corridor", "unknown"))
     police_station = str(r.get("police_station", "unknown"))
     event_cause = str(r.get("event_cause", "others"))
@@ -186,7 +177,7 @@ def engineer_features(
     veh_type = str(r.get("veh_type", "unknown"))
     geo_cluster_str = str(geo_cluster)
 
-    # ---- target encodings (with global_mean fallback) ----
+    # target encodings (with global_mean fallback)
     global_mean: float = target_encodings.get("global_mean", 0.5)
 
     def _te(col: str, key: str) -> float:
@@ -199,7 +190,7 @@ def engineer_features(
     zone_te = _te("zone", zone)
     veh_type_te = _te("veh_type", veh_type)
 
-    # ---- label encodings (with max+1 fallback for unseen) ----
+    # label encodings (with max+1 fallback for unseen)
     def _le(col: str, key: str) -> int:
         mapping: dict = label_encodings.get(col, {})
         if key in mapping:
@@ -212,7 +203,7 @@ def engineer_features(
     corridor_le = _le("corridor", corridor)
     zone_le = _le("zone", zone)
 
-    # ---- assemble dicts ----
+    # assemble dicts
     all_feats: Dict[str, float] = {
         "hour": hour,
         "dow": dow,
@@ -247,10 +238,7 @@ def engineer_features(
 
     return clf_features, reg_features
 
-
-# ---------------------------------------------------------------------------
 # Whole-DataFrame training feature engineering
-# ---------------------------------------------------------------------------
 
 def prepare_training_features(
     df: pd.DataFrame,
@@ -288,7 +276,7 @@ def prepare_training_features(
 
     df = df.copy()
 
-    # --- parse datetime ---
+    # parse datetime
     df["start_datetime"] = pd.to_datetime(df["start_datetime"])
     if df["start_datetime"].dt.tz is None:
         df["start_datetime"] = df["start_datetime"].dt.tz_localize("Asia/Kolkata")
@@ -314,25 +302,25 @@ def prepare_training_features(
     df["has_junction"] = df["has_junction"].astype(int)
     df["description_len"] = df["description"].fillna("").str.len()
 
-    # --- geo cluster ---
+    # geo cluster
     lat_lon = df[["latitude", "longitude"]].fillna(0).values
     if kmeans_model is None:
         kmeans_model = KMeans(n_clusters=25, random_state=random_state, n_init=10)
         kmeans_model.fit(lat_lon)
     df["geo_cluster"] = kmeans_model.predict(lat_lon)
 
-    # --- fill missing categoricals ---
+    # fill missing categoricals
     for col in ["corridor", "zone", "police_station", "event_cause", "veh_type"]:
         df[col] = df[col].fillna("unknown").astype(str)
 
-    # --- label encodings (fit on full data) ---
+    # label encodings (fit on full data)
     label_encodings: Dict[str, Any] = {}
     for col in ["event_cause", "veh_type", "corridor", "zone"]:
         unique_vals = sorted(df[col].unique().tolist())
         label_encodings[col] = {v: i for i, v in enumerate(unique_vals)}
         df[f"{col}_le"] = df[col].map(label_encodings[col]).fillna(len(unique_vals)).astype(int)
 
-    # --- OOF target encoding (requires_road_closure must exist) ---
+    # OOF target encoding (requires_road_closure must exist)
     target_col = "requires_road_closure"
     global_mean = float(df[target_col].mean())
 
@@ -348,7 +336,7 @@ def prepare_training_features(
             means = train_fold.groupby(col)[target_col].mean()
             df.loc[df.index[val_idx], f"{col}_te"] = col_key.map(means).fillna(global_mean).values
 
-    # --- final global target encodings for inference ---
+    # final global target encodings for inference
     target_encodings: Dict[str, Any] = {"global_mean": global_mean}
     for col in te_cols:
         target_encodings[col] = df.groupby(col)[target_col].mean().to_dict()

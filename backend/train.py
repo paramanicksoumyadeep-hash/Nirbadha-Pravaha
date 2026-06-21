@@ -1,6 +1,6 @@
 """
 train.py
---------
+
 Training pipeline for the Nirbadha Pravaha traffic command center.
 
 Steps:
@@ -33,27 +33,24 @@ import pandas as pd
 
 warnings.filterwarnings("ignore")
 
-# ---------------------------------------------------------------------------
 # Resolve paths
-# ---------------------------------------------------------------------------
+
 BACKEND_DIR = Path(__file__).parent.resolve()
 MODELS_DIR = BACKEND_DIR / "models"
 MODELS_DIR.mkdir(exist_ok=True)
 
 CONFIG_PATH = BACKEND_DIR / "config.json"
 
-# ---------------------------------------------------------------------------
 # 1. Load config
-# ---------------------------------------------------------------------------
+
 with open(CONFIG_PATH, "r") as fh:
     CFG: Dict[str, Any] = json.load(fh)
 
 RANDOM_STATE: int = int(CFG["RANDOM_STATE"])
 N_GEO_CLUSTERS: int = int(CFG["N_GEO_CLUSTERS"])
 
-# ---------------------------------------------------------------------------
 # 2. Load (or synthesise) data
-# ---------------------------------------------------------------------------
+
 CANDIDATE_PATHS: List[Path] = [
     BACKEND_DIR.parent / "dataset" / "Astram_event_data_anonymized.csv",  # confirmed location
     BACKEND_DIR.parent / "Astram_event_data_anonymized.csv",
@@ -61,7 +58,6 @@ CANDIDATE_PATHS: List[Path] = [
     BACKEND_DIR / "Astram_event_data_anonymized.csv",
     Path("Astram_event_data_anonymized.csv"),
 ]
-
 
 def _synthesise_data(n: int = 8173, rng_seed: int = 42) -> pd.DataFrame:
     """Generate a realistic synthetic dataset for Bengaluru traffic events."""
@@ -146,7 +142,6 @@ def _synthesise_data(n: int = 8173, rng_seed: int = 42) -> pd.DataFrame:
     })
     return df
 
-
 def load_data() -> pd.DataFrame:
     for path in CANDIDATE_PATHS:
         if path.exists():
@@ -156,10 +151,8 @@ def load_data() -> pd.DataFrame:
     print("[train] CSV not found at any candidate path — generating synthetic data (8 173 rows).")
     return _synthesise_data(8173, RANDOM_STATE)
 
-
-# ---------------------------------------------------------------------------
 # 3. Leakage audit
-# ---------------------------------------------------------------------------
+
 LEAKAGE_COLS = [
     "requires_road_closure",
     "closure_time",
@@ -167,7 +160,6 @@ LEAKAGE_COLS = [
     "resolution_time",
     "actual_closure",
 ]
-
 
 def leakage_audit(df: pd.DataFrame) -> None:
     print("\n[Leakage Audit] Checking for target-leaking columns …")
@@ -180,10 +172,8 @@ def leakage_audit(df: pd.DataFrame) -> None:
     assert "duration_min" in df.columns, "Duration column missing!"
     print("[Leakage Audit] Done.\n")
 
-
-# ---------------------------------------------------------------------------
 # 4–8. Feature engineering + training
-# ---------------------------------------------------------------------------
+
 def main() -> None:
     from sklearn.cluster import KMeans
     from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier, HistGradientBoostingClassifier
@@ -206,11 +196,11 @@ def main() -> None:
 
     from features import prepare_training_features, FEATURE_COLS, REG_FEATURES
 
-    # ---- load ----
+    # load
     df_raw = load_data()
     print(f"[train] Dataset shape: {df_raw.shape}")
 
-    # --- normalise columns ---
+    # normalise columns
     df_raw.columns = [c.strip().lower().replace(" ", "_") for c in df_raw.columns]
 
     # Ensure required columns exist with sensible defaults
@@ -244,12 +234,12 @@ def main() -> None:
 
     leakage_audit(df_raw)
 
-    # ---- KMeans geo-clustering ----
+    # KMeans geo-clustering
     print("[train] Fitting KMeans geo-clusters …")
     kmeans = KMeans(n_clusters=N_GEO_CLUSTERS, random_state=RANDOM_STATE, n_init=10)
     kmeans.fit(df_raw[["latitude", "longitude"]].values)
 
-    # ---- engineer features ----
+    # engineer features
     print("[train] Engineering features …")
     df_feat, target_encodings, label_encodings, kmeans = prepare_training_features(
         df_raw,
@@ -258,7 +248,7 @@ def main() -> None:
         kmeans_model=kmeans,
     )
 
-    # ---- prepare X / y ----
+    # prepare X / y
     X_clf = df_feat[FEATURE_COLS].values
     y_clf = df_feat["requires_road_closure"].values.astype(int)
 
@@ -266,13 +256,13 @@ def main() -> None:
     X_reg = df_feat.loc[duration_mask, REG_FEATURES].values
     y_reg = np.log1p(df_feat.loc[duration_mask, "duration_min"].values)
 
-    # ---- scale_pos_weight ----
+    # scale_pos_weight
     pos = y_clf.sum()
     neg = len(y_clf) - pos
     spw = float(neg / max(pos, 1))
     print(f"[train] Class distribution — positive: {pos}, negative: {neg}, scale_pos_weight: {spw:.3f}")
 
-    # ---- 5. Evaluate Multiple Models for Closure Classifier ----
+    # 5. Evaluate Multiple Models for Closure Classifier
     print("[train] Evaluating candidate models for closure classifier ...")
     lgb_params = {
         "n_estimators": int(CFG["N_ESTIMATORS_CLOSURE"]),
@@ -324,7 +314,7 @@ def main() -> None:
     closure_model.fit(X_clf, y_clf)
     print(f"[train] {best_model_name} trained on full dataset.")
 
-    # ---- 6. Train RandomForest duration regressor ----
+    # 6. Train RandomForest duration regressor
     print("[train] Training RandomForest duration regressor ...")
     duration_model = RandomForestRegressor(
         n_estimators=int(CFG["N_ESTIMATORS_DURATION"]),
@@ -335,20 +325,20 @@ def main() -> None:
     duration_model.fit(X_reg, y_reg)
     print("[train] Duration model trained.")
 
-    # ---- 9. Save model artefacts ----
+    # 9. Save model artefacts
     joblib.dump(closure_model, MODELS_DIR / "closure_model.joblib")
     joblib.dump(duration_model, MODELS_DIR / "duration_model.joblib")
     joblib.dump(kmeans, MODELS_DIR / "kmeans.joblib")
     print(f"[train] Models saved to {MODELS_DIR}/")
 
-    # ---- 10. Save encodings ----
+    # 10. Save encodings
     with open(BACKEND_DIR / "target_encodings.json", "w") as fh:
         json.dump(target_encodings, fh, indent=2)
     with open(BACKEND_DIR / "label_encodings.json", "w") as fh:
         json.dump(label_encodings, fh, indent=2)
     print("[train] Encodings saved.")
 
-    # ---- 11. Compute metrics ----
+    # 11. Compute metrics
     print("[train] Computing metrics …")
     best_threshold = float(CFG["BEST_THRESHOLD"])
 
@@ -433,10 +423,10 @@ def main() -> None:
         json.dump(metrics, fh, indent=2)
     print("[train] Metrics saved.")
 
-    # ---- Generate corridor lookup ----
+    # Generate corridor lookup
     _generate_corridor_lookup(df_raw)
 
-    # ---- Generate events snapshot ----
+    # Generate events snapshot
     _generate_events_snapshot(df_raw)
 
     print("\n[train] Training pipeline complete!")
@@ -446,10 +436,8 @@ def main() -> None:
     print(f"  MAE (min): {mae_min:.1f}")
     print(f"  R² (log) : {r2_log:.4f}")
 
-
-# ---------------------------------------------------------------------------
 # Corridor lookup generator
-# ---------------------------------------------------------------------------
+
 def _generate_corridor_lookup(df: pd.DataFrame) -> None:
     """Compute median lat/lon + zone + police_station per corridor."""
     if "corridor" not in df.columns:
@@ -468,10 +456,8 @@ def _generate_corridor_lookup(df: pd.DataFrame) -> None:
         json.dump(lookup, fh, indent=2)
     print(f"[train] Corridor lookup saved -> {out_path}")
 
-
-# ---------------------------------------------------------------------------
 # Events snapshot for /api/events
-# ---------------------------------------------------------------------------
+
 def _generate_events_snapshot(df: pd.DataFrame) -> None:
     """Persist a serialisable JSON snapshot of the training events."""
     snapshot_cols = [
@@ -492,7 +478,6 @@ def _generate_events_snapshot(df: pd.DataFrame) -> None:
     out_path.parent.mkdir(exist_ok=True)
     out.to_json(str(out_path), orient="records", date_format="iso")
     print(f"[train] Events snapshot saved → {out_path}  ({len(out)} rows)")
-
 
 if __name__ == "__main__":
     main()

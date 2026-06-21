@@ -1,6 +1,6 @@
 """
 generate_lookups.py
--------------------
+
 Standalone script to (re-)generate corridor_lookup.json from the training CSV.
 Run after acquiring new data to refresh nearest-neighbour lookup used by main.py.
 
@@ -23,14 +23,13 @@ import pandas as pd
 BACKEND_DIR = Path(__file__).parent.resolve()
 
 CANDIDATE_PATHS = [
-    # ── Primary: dataset/ folder the user placed their CSV in ──────────────
+    # Primary: dataset/ folder the user placed their CSV in
     BACKEND_DIR.parent / "dataset" / "Astram_event_data_anonymized.csv",
-    # ── Legacy / fallback paths ─────────────────────────────────────────────
+    # Legacy / fallback paths
     BACKEND_DIR.parent / "Astram_event_data_anonymized.csv",
     BACKEND_DIR.parent / "flipkartevent" / "Astram_event_data_anonymized.csv",
     BACKEND_DIR / "Astram_event_data_anonymized.csv",
 ]
-
 
 def load_csv(csv_path: str | None) -> pd.DataFrame:
     """Load CSV from the given path or auto-discover it."""
@@ -52,7 +51,6 @@ def load_csv(csv_path: str | None) -> pd.DataFrame:
         file=sys.stderr,
     )
     return _synthetic_df()
-
 
 def _synthetic_df() -> pd.DataFrame:
     """Minimal synthetic fallback so the script always produces output."""
@@ -78,7 +76,6 @@ def _synthetic_df() -> pd.DataFrame:
         "latitude": rng.uniform(12.82, 13.08, n),
         "longitude": rng.uniform(77.47, 77.73, n),
     })
-
 
 def build_corridor_lookup(df: pd.DataFrame) -> Dict[str, Any]:
     """
@@ -131,7 +128,6 @@ def build_corridor_lookup(df: pd.DataFrame) -> Dict[str, Any]:
 
     return lookup
 
-
 def build_zone_lookup(df: pd.DataFrame) -> Dict[str, Any]:
     """
     Compute per-zone statistics: centroid lat/lon, top corridors, event count.
@@ -170,7 +166,6 @@ def build_zone_lookup(df: pd.DataFrame) -> Dict[str, Any]:
 
     return lookup
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate corridor/zone lookup JSON files.")
     parser.add_argument("--csv", type=str, default=None, help="Path to the training CSV.")
@@ -202,7 +197,6 @@ def main() -> None:
         print(f"  {k:30s} lat={v['lat']:.4f}  lon={v['lon']:.4f}  zone={v['zone']}")
 
     print("\n[generate_lookups] Done.")
-
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, CircleMarker } from 'react-leaflet'
 import L from 'leaflet'
 import {
@@ -14,7 +14,7 @@ import {
   Cell,
   Legend,
 } from 'recharts'
-import { Filter, RefreshCw, MapPin, Activity } from 'lucide-react'
+import { Filter, RefreshCw, MapPin, Activity, Search } from 'lucide-react'
 import { getHotspots, getEvents, getNearbyRoads, HotspotData, EventData, NearbyRoad } from '../lib/api'
 import LoadingSkeleton from '../components/LoadingSkeleton'
 import LocationSearchBox from '../components/LocationSearchBox'
@@ -40,7 +40,7 @@ const getBarricadeIcon = (color: string) => {
   })
 }
 
-const redIcon = getBarricadeIcon('#ef4444')
+const redIcon = getBarricadeIcon('#D2001A') // Primary TomTom Red
 const greenIcon = getBarricadeIcon('#10b981')
 const yellowIcon = getBarricadeIcon('#f59e0b')
 
@@ -51,7 +51,7 @@ const CHART_COLORS = {
   purple: '#a855f7',
   navy: '#1e3a5f',
   green: '#10b981',
-  red: '#ef4444',
+  red: '#D2001A',
 }
 
 interface ChartCardProps {
@@ -62,7 +62,7 @@ interface ChartCardProps {
 
 function ChartCard({ title, children, color = '#f59e0b' }: ChartCardProps) {
   return (
-    <div className="glass rounded-xl p-5">
+    <div className="bg-surface border border-border rounded-xl p-5 shadow-sm">
       <div
         className="text-sm font-semibold text-text-primary mb-4 flex items-center gap-2"
         style={{ borderLeft: `3px solid ${color}`, paddingLeft: '8px' }}
@@ -77,7 +77,7 @@ function ChartCard({ title, children, color = '#f59e0b' }: ChartCardProps) {
 const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; name?: string }>; label?: string }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-card border border-border rounded-lg p-3 shadow-xl text-sm">
+      <div className="bg-card border border-border rounded-lg p-3 shadow-lg text-sm z-50">
         <p className="text-text-secondary mb-1">{label}</p>
         {payload.map((p, i) => (
           <p key={i} className="text-text-primary font-semibold">
@@ -112,7 +112,7 @@ function processEvents(events: EventData[]) {
     .slice(0, 8)
     .map(([cause, count]) => ({ cause, count }))
 
-  // Planned vs Unplanned (using event_cause as proxy)
+  // Planned vs Unplanned
   const plannedCauses = ['VIP Movement', 'Public Event', 'Festival', 'Road Work']
   let planned = 0, unplanned = 0
   events.forEach((e) => {
@@ -151,7 +151,7 @@ function processEvents(events: EventData[]) {
   return { byHour, byCause, plannedVsUnplanned, byCorridor, avgDurationByCause }
 }
 
-export default function DashboardPage() {
+export default function ArchivePage() {
   const [hotspots, setHotspots] = useState<HotspotData[]>([])
   const [events, setEvents] = useState<EventData[]>([])
   const [nearbyRoads, setNearbyRoads] = useState<NearbyRoad[]>([])
@@ -164,7 +164,7 @@ export default function DashboardPage() {
   const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const params: Record<string, string | number> = { page_size: 300 } // Reduced to 300 for map smoothness
+      const params: Record<string, string | number> = { page_size: 300 }
       if (filterCause !== 'All') params.cause = filterCause
       if (filterStart) params.date_from = filterStart
       if (filterEnd) params.date_to = filterEnd
@@ -205,33 +205,23 @@ export default function DashboardPage() {
   const { byHour, byCause, plannedVsUnplanned, byCorridor, avgDurationByCause } = processEvents(events)
 
   return (
-    <div className="min-h-screen pt-16 pb-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen pt-[60px] pb-12 bg-background">
+      {/* Main Content (Original Dashboard Functionality) */}
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {/* Header */}
-        <div className="mb-8 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+        <div className="mb-6 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
           <div>
             <h1 className="text-3xl font-bold text-text-primary mb-2">
-              Live <span className="text-accent-blue">Command Dashboard</span>
+              Event <span className="text-primary">Archive & Analytics</span>
             </h1>
             <p className="text-text-secondary">
-              Geo-cluster hotspot map and event analytics across Bengaluru.
+              Geo-cluster hotspot map and historical event analytics across Bengaluru.
             </p>
-          </div>
-          <div className="bg-surface/30 px-4 py-2 rounded-lg border border-white/5 text-xs text-text-secondary">
-            <div className="font-semibold text-text-primary mb-1 uppercase tracking-wider text-[10px]">Data Timeline</div>
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-accent-blue"></div>
-              <span>Nov 2023 - Apr 2024</span>
-            </div>
-            <div className="flex items-center gap-2 mt-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-accent-green"></div>
-              <span>20th July - Present</span>
-            </div>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="glass rounded-xl p-4 mb-6 flex flex-wrap items-end gap-4">
+        <div className="bg-surface border border-border rounded-xl p-4 mb-6 flex flex-wrap items-end gap-4 shadow-sm">
           <div>
             <label className="block text-xs mb-1 select-none">&nbsp;</label>
             <div className="flex items-center gap-2 text-text-secondary h-[38px]">
@@ -244,7 +234,7 @@ export default function DashboardPage() {
             <select
               value={filterCause}
               onChange={(e) => setFilterCause(e.target.value)}
-              className="input-dark w-full h-[38px]"
+              className="bg-background border border-border rounded-lg px-4 py-2 text-text-primary focus:outline-none focus:border-primary w-full h-[38px] text-sm"
             >
               <option value="All">All</option>
               {EVENT_CAUSES.map((c) => (
@@ -258,7 +248,7 @@ export default function DashboardPage() {
               type="date"
               value={filterStart}
               onChange={(e) => setFilterStart(e.target.value)}
-              className="input-dark w-40 h-[38px]"
+              className="bg-background border border-border rounded-lg px-3 py-2 text-text-primary focus:outline-none focus:border-primary w-40 h-[38px] text-sm"
             />
           </div>
           <div>
@@ -267,14 +257,14 @@ export default function DashboardPage() {
               type="date"
               value={filterEnd}
               onChange={(e) => setFilterEnd(e.target.value)}
-              className="input-dark w-40 h-[38px]"
+              className="bg-background border border-border rounded-lg px-3 py-2 text-text-primary focus:outline-none focus:border-primary w-40 h-[38px] text-sm"
             />
           </div>
           <div>
             <label className="block text-xs mb-1 select-none">&nbsp;</label>
             <button
               onClick={handleApplyFilters}
-              className="btn-amber flex items-center gap-2 h-[38px] px-6"
+              className="btn-amber flex items-center gap-2 h-[38px] px-6 text-sm"
             >
               <RefreshCw className="w-4 h-4" />
               Apply Filters
@@ -283,9 +273,8 @@ export default function DashboardPage() {
         </div>
 
         {/* Map and Details Panel */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6 max-w-[1200px] mx-auto">
-          
-          <div className="lg:col-span-3 glass rounded-xl overflow-hidden relative" style={{ height: '450px' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+          <div className="lg:col-span-3 bg-surface border border-border rounded-xl overflow-hidden shadow-sm relative" style={{ height: '500px' }}>
             {loading ? (
               <div className="w-full h-full skeleton" />
             ) : (
@@ -303,7 +292,7 @@ export default function DashboardPage() {
                 {events.map((e, index) => {
                   let pinColor = '#10b981' // Green
                   if (e.requires_road_closure) {
-                    pinColor = '#ef4444' // Red
+                    pinColor = '#D2001A' // TomTom Red
                   } else if (['accident', 'water_logging', 'tree_fall', 'procession', 'vip_movement', 'protest'].includes(e.event_cause?.toLowerCase())) {
                     pinColor = '#f59e0b' // Yellow
                   }
@@ -334,9 +323,9 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="lg:col-span-1 glass rounded-xl p-5 flex flex-col h-[450px] overflow-y-auto">
-            <h3 className="font-bold text-lg mb-4 border-b border-white/10 pb-3 flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-accent-amber" />
+          <div className="lg:col-span-1 bg-surface border border-border rounded-xl p-5 flex flex-col h-[500px] overflow-y-auto shadow-sm">
+            <h3 className="font-bold text-lg mb-4 border-b border-border pb-3 flex items-center gap-2 text-text-primary">
+              <MapPin className="w-5 h-5 text-primary" />
               Event Details
             </h3>
             
@@ -351,50 +340,52 @@ export default function DashboardPage() {
                   const e = events.find(ev => (ev.id || ev.event_id) === selectedEventId)!
                   return (
                     <>
-                      <div className="font-bold text-xl text-accent-amber capitalize mb-1">
+                      <div className="font-bold text-xl text-primary capitalize mb-1">
                         {e.event_cause?.replace(/_/g, ' ') || 'Unknown'}
                       </div>
-                      <div className="text-xs text-text-secondary mb-4 border-b border-white/10 pb-4">
+                      <div className="text-xs text-text-secondary mb-4 border-b border-border pb-4">
                         {new Date(e.start_datetime).toLocaleString()}
                       </div>
                       
                       <div className="space-y-3">
                         <div className="flex items-start gap-3">
-                          <Activity className="w-4 h-4 text-accent-blue mt-0.5" />
+                          <Activity className="w-4 h-4 text-blue-500 mt-0.5" />
                           <div>
                             <div className="text-xs text-text-secondary">Corridor</div>
-                            <div className="font-medium text-sm">{e.corridor || 'Unknown'}</div>
+                            <div className="font-medium text-sm text-text-primary">{e.corridor || 'Unknown'}</div>
                           </div>
                         </div>
                         
                         <div className="flex items-start gap-3">
-                          <MapPin className="w-4 h-4 text-red-400 mt-0.5" />
+                          <MapPin className="w-4 h-4 text-primary mt-0.5" />
                           <div>
                             <div className="text-xs text-text-secondary">Road Closure Required</div>
-                            <div className="font-medium text-sm text-red-400">{e.requires_road_closure ? 'Yes' : 'No'}</div>
+                            <div className={`font-medium text-sm ${e.requires_road_closure ? 'text-primary' : 'text-text-primary'}`}>
+                              {e.requires_road_closure ? 'Yes' : 'No'}
+                            </div>
                           </div>
                         </div>
                         
                         <div className="flex items-start gap-3">
-                          <svg className="w-4 h-4 text-accent-amber mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                          <svg className="w-4 h-4 text-amber-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                           <div>
                             <div className="text-xs text-text-secondary">Duration</div>
-                            <div className="font-medium text-sm">{e.duration_min ? `${Math.round(e.duration_min)} min` : 'Unknown'}</div>
+                            <div className="font-medium text-sm text-text-primary">{e.duration_min ? `${Math.round(e.duration_min)} min` : 'Unknown'}</div>
                           </div>
                         </div>
                       </div>
                       
                       {nearbyRoads.length > 0 && (
-                        <div className="mt-6 pt-4 border-t border-white/10">
+                        <div className="mt-6 pt-4 border-t border-border">
                           <h4 className="font-semibold text-sm mb-3 text-text-secondary">Affected Corridors (Spillover)</h4>
                           <div className="space-y-2">
                             {nearbyRoads.map((road, idx) => (
-                              <div key={idx} className="bg-white/5 rounded-lg p-2.5 flex justify-between items-center">
+                              <div key={idx} className="bg-background rounded-lg p-2.5 flex justify-between items-center border border-border">
                                 <div>
-                                  <div className="text-xs font-semibold">{road.name}</div>
+                                  <div className="text-xs font-semibold text-text-primary">{road.name}</div>
                                   <div className="text-[10px] text-text-secondary">{road.distance_km} km away</div>
                                 </div>
-                                <div className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${road.risk_level === 'red' ? 'bg-red-500/20 text-red-400' : road.risk_level === 'yellow' ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}`}>
+                                <div className={`text-[10px] uppercase font-bold px-2 py-1 rounded-full ${road.risk_level === 'red' ? 'bg-red-500/10 text-red-600 dark:text-red-400' : road.risk_level === 'yellow' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'}`}>
                                   {road.risk_level}
                                 </div>
                               </div>
@@ -411,11 +402,19 @@ export default function DashboardPage() {
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-6 mb-6 text-sm text-text-secondary">
+        <div className="flex items-center gap-6 mb-6 text-sm text-text-secondary bg-surface p-3 rounded-lg border border-border shadow-sm inline-flex">
           <span className="font-medium">Map Events:</span>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full" />
-            <span>Past Events</span>
+            <div className="w-3 h-3 rounded-full bg-primary" />
+            <span>Severe / Road Closure</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-amber-500" />
+            <span>Moderate Impact</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-emerald-500" />
+            <span>Low Impact</span>
           </div>
         </div>
 
@@ -429,20 +428,19 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Events by hour */}
             <ChartCard title="Events by Hour of Day" color={CHART_COLORS.blue}>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={byHour} margin={{ top: 0, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2a3550" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" vertical={false} />
                   <XAxis
                     dataKey="hour"
-                    tick={{ fill: '#94a3b8', fontSize: 9 }}
-                    axisLine={{ stroke: '#2a3550' }}
+                    tick={{ fill: 'var(--text-secondary)', fontSize: 9 }}
+                    axisLine={{ stroke: 'var(--border-color)' }}
                     tickLine={false}
                     interval={2}
                   />
                   <YAxis
-                    tick={{ fill: '#94a3b8', fontSize: 11 }}
+                    tick={{ fill: 'var(--text-secondary)', fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
                   />
@@ -452,7 +450,6 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             </ChartCard>
 
-            {/* Top event causes */}
             <ChartCard title="Top Event Causes" color={CHART_COLORS.teal}>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart
@@ -460,12 +457,12 @@ export default function DashboardPage() {
                   layout="vertical"
                   margin={{ top: 0, right: 20, left: 0, bottom: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2a3550" horizontal={false} />
-                  <XAxis type="number" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" horizontal={false} />
+                  <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} axisLine={false} tickLine={false} />
                   <YAxis
                     type="category"
                     dataKey="cause"
-                    tick={{ fill: '#94a3b8', fontSize: 10 }}
+                    tick={{ fill: 'var(--text-secondary)', fontSize: 10 }}
                     axisLine={false}
                     tickLine={false}
                     width={110}
@@ -476,7 +473,6 @@ export default function DashboardPage() {
               </ResponsiveContainer>
             </ChartCard>
 
-            {/* Planned vs Unplanned */}
             <ChartCard title="Planned vs Unplanned Events" color={CHART_COLORS.amber}>
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
@@ -493,14 +489,13 @@ export default function DashboardPage() {
                   <Tooltip content={<CustomTooltip />} />
                   <Legend
                     formatter={(value) => (
-                      <span style={{ color: '#94a3b8', fontSize: 12 }}>{value}</span>
+                      <span className="text-text-secondary text-xs">{value}</span>
                     )}
                   />
                 </PieChart>
               </ResponsiveContainer>
             </ChartCard>
 
-            {/* Top corridors */}
             <ChartCard title="Top 10 Traffic Corridors" color={CHART_COLORS.purple}>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart
@@ -508,12 +503,12 @@ export default function DashboardPage() {
                   layout="vertical"
                   margin={{ top: 0, right: 20, left: 0, bottom: 0 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2a3550" horizontal={false} />
-                  <XAxis type="number" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color)" horizontal={false} />
+                  <XAxis type="number" tick={{ fill: 'var(--text-secondary)', fontSize: 11 }} axisLine={false} tickLine={false} />
                   <YAxis
                     type="category"
                     dataKey="corridor"
-                    tick={{ fill: '#94a3b8', fontSize: 10 }}
+                    tick={{ fill: 'var(--text-secondary)', fontSize: 10 }}
                     axisLine={false}
                     tickLine={false}
                     width={120}
@@ -523,33 +518,9 @@ export default function DashboardPage() {
                 </BarChart>
               </ResponsiveContainer>
             </ChartCard>
-
-            {/* Avg Duration by Cause */}
-            <ChartCard title="Avg Duration by Cause (mins)" color={CHART_COLORS.green}>
-              <ResponsiveContainer width="100%" height={220}>
-                <BarChart
-                  data={avgDurationByCause}
-                  layout="vertical"
-                  margin={{ top: 0, right: 20, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2a3550" horizontal={false} />
-                  <XAxis type="number" tick={{ fill: '#94a3b8', fontSize: 11 }} axisLine={false} tickLine={false} />
-                  <YAxis
-                    type="category"
-                    dataKey="cause"
-                    tick={{ fill: '#94a3b8', fontSize: 10 }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={110}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar dataKey="duration" fill={CHART_COLORS.green} radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </ChartCard>
           </div>
         )}
-      </div>
+      </main>
     </div>
   )
 }

@@ -445,42 +445,7 @@ export default function ModelPage() {
           </div>
         )}
 
-        {/* Predicted vs Actual scatter */}
-        {!loading && scatterData.length > 0 && (
-          <div className="glass rounded-xl p-6 mb-8">
-            <h3 className="text-sm font-bold text-text-primary mb-4">
-              Duration Model — Predicted vs Actual (sample, R²={m.r2_log?.toFixed(3) ?? '0.510'})
-            </h3>
-            <ResponsiveContainer width="100%" height={280}>
-              <ScatterChart margin={{ top: 10, right: 20, left: -10, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a3550" />
-                <XAxis
-                  type="number"
-                  dataKey="actual"
-                  name="Actual (min)"
-                  tick={{ fill: '#94a3b8', fontSize: 10 }}
-                  axisLine={{ stroke: '#2a3550' }}
-                  label={{ value: 'Actual (min)', position: 'insideBottom', offset: -10, fill: '#94a3b8', fontSize: 11 }}
-                />
-                <YAxis
-                  type="number"
-                  dataKey="predicted"
-                  name="Predicted (min)"
-                  tick={{ fill: '#94a3b8', fontSize: 10 }}
-                  axisLine={false}
-                  label={{ value: 'Predicted (min)', angle: -90, position: 'insideLeft', fill: '#94a3b8', fontSize: 11 }}
-                />
-                <Tooltip cursor={{ strokeDasharray: '3 3' }} content={<CustomTooltip />} />
-                <Scatter data={scatterData} fill="#14b8a6" opacity={0.6} />
-                <ReferenceLine
-                  segment={[{ x: 0, y: 0 }, { x: 400, y: 400 }]}
-                  stroke="#f59e0b"
-                  strokeDasharray="5 5"
-                />
-              </ScatterChart>
-            </ResponsiveContainer>
-          </div>
-        )}
+
       </div>
     </div>
   )

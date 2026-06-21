@@ -93,7 +93,7 @@ const leakageSteps = [
 export default function CommandCenter() {
   return (
     <div className="min-h-screen">
-      {/* ── Hero ─────────────────────────────────────────────────────────────── */}
+      {/* Hero */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
         {/* Background grid */}
         <div className="absolute inset-0 bg-grid opacity-30" />
@@ -131,12 +131,12 @@ export default function CommandCenter() {
               variants={fadeUp}
               className="text-6xl md:text-8xl font-black tracking-tight mb-4 leading-none"
             >
-              <span className="bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
+              <span className="text-black dark:text-transparent dark:bg-gradient-to-r dark:from-white dark:via-slate-100 dark:to-slate-300 dark:bg-clip-text">
                 Nirbadha
               </span>
               <br />
               <span
-                className="bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-200 bg-clip-text text-transparent"
+                className="text-black dark:text-transparent dark:bg-gradient-to-r dark:from-amber-400 dark:via-amber-300 dark:to-yellow-200 dark:bg-clip-text"
                 style={{ textShadow: 'none' }}
               >
                 Pravaha
@@ -164,31 +164,26 @@ export default function CommandCenter() {
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/predict"
-                className="group inline-flex items-center gap-2 btn-amber text-lg px-8 py-4 rounded-xl"
+                className="group relative inline-flex items-center justify-center gap-3 bg-gradient-to-r from-primary to-primary-hover text-white text-lg font-medium px-8 py-4 rounded-full shadow-[0_0_20px_rgba(var(--accent-primary),0.3)] hover:shadow-[0_0_30px_rgba(var(--accent-primary),0.5)] hover:-translate-y-0.5 transition-all duration-300"
               >
                 <Zap className="w-5 h-5" />
-                Start Forecasting
+                <span>Start Forecasting</span>
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 to="/dashboard"
-                className="btn-ghost text-lg px-8 py-4 rounded-xl inline-flex items-center gap-2"
+                className="group relative inline-flex items-center justify-center gap-3 bg-surface/50 backdrop-blur-xl border border-border/50 text-text-primary text-lg font-medium px-8 py-4 rounded-full shadow-sm hover:bg-surface hover:shadow-md hover:border-border hover:-translate-y-0.5 transition-all duration-300"
               >
-                <Map className="w-5 h-5" />
-                View Live Dashboard
+                <Map className="w-5 h-5 text-text-secondary group-hover:text-primary transition-colors" />
+                <span>View Live Dashboard</span>
               </Link>
             </motion.div>
           </motion.div>
         </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-text-secondary animate-bounce">
-          <span className="text-xs tracking-wider uppercase">Scroll</span>
-          <div className="w-px h-8 bg-gradient-to-b from-text-secondary to-transparent" />
-        </div>
       </section>
 
-      {/* ── Stat Strip ───────────────────────────────────────────────────────── */}
+      {/* Stat Strip */}
       <section className="py-16 px-6 bg-surface/50">
         <div className="max-w-5xl mx-auto">
           <motion.div
@@ -213,7 +208,7 @@ export default function CommandCenter() {
         </div>
       </section>
 
-      {/* ── Honest Metrics Promise ────────────────────────────────────────────── */}
+      {/* Honest Metrics Promise */}
       <section className="py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <motion.div
@@ -291,7 +286,7 @@ export default function CommandCenter() {
         </div>
       </section>
 
-      {/* ── System Components ─────────────────────────────────────────────────── */}
+      {/* System Components */}
       <section className="py-20 px-6 bg-surface/30">
         <div className="max-w-5xl mx-auto">
           <motion.div

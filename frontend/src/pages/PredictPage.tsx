@@ -91,8 +91,6 @@ function MapClickHandler({ onMapClick }: MapClickHandlerProps) {
   return null
 }
 
-
-
 interface FormState {
   latitude: string
   longitude: string
@@ -212,7 +210,7 @@ export default function PredictPage() {
           <h1 className="text-3xl font-bold text-text-primary mb-2">
             Traffic Event{' '}
             <span className="bg-gradient-to-r from-amber-400 to-yellow-300 bg-clip-text text-transparent">
-              Forecaster
+              Reporter
             </span>
           </h1>
           <p className="text-text-secondary">
@@ -221,7 +219,7 @@ export default function PredictPage() {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* ── LEFT: Form ──────────────────────────────────────────────────── */}
+          {/* LEFT: Form */}
           <div className="space-y-4">
             <div className="glass rounded-xl p-6">
               <h2 className="text-lg font-bold text-text-primary mb-5 flex items-center gap-2">
@@ -404,12 +402,12 @@ export default function PredictPage() {
                   {loading ? (
                     <>
                       <Loader2 className="w-5 h-5 animate-spin" />
-                      Forecasting...
+                      Reporting...
                     </>
                   ) : (
                     <>
                       <Shield className="w-5 h-5" />
-                      Forecast Event Impact
+                      Report Event Impact
                     </>
                   )}
                 </button>
@@ -417,7 +415,7 @@ export default function PredictPage() {
             </div>
           </div>
 
-          {/* ── RIGHT: Map + Results ─────────────────────────────────────────── */}
+          {/* RIGHT: Map + Results */}
           <div className="space-y-4">
             {/* Map */}
             <div className="glass rounded-xl overflow-hidden" style={{ height: '380px' }}>

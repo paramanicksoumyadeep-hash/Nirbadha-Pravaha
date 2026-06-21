@@ -1,6 +1,6 @@
 """
 recommend.py
-------------
+
 Resource recommendation engine for the Nirbadha Pravaha traffic command center.
 
 Given model outputs and configuration, determines severity tier, recommended
@@ -11,10 +11,7 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-
-# ---------------------------------------------------------------------------
 # Main recommendation function
-# ---------------------------------------------------------------------------
 
 def recommend_resources(
     event_cause: str,
@@ -52,7 +49,7 @@ def recommend_resources(
         diversion_plan       : str  — human-readable diversion guidance
     """
 
-    # ---- unpack config ----
+    # unpack config
     severity_tiers: Dict = config["SEVERITY_TIERS"]
     manpower_map: Dict = config["MANPOWER"]
     barricade_map: Dict = config["BARRICADE_UNITS"]
@@ -65,7 +62,7 @@ def recommend_resources(
     med_proba_min: float = float(severity_tiers["MEDIUM"]["closure_proba_min"])
     med_dur_min: float = float(severity_tiers["MEDIUM"]["duration_min_threshold"])
 
-    # ---- determine severity tier ----
+    # determine severity tier
     if closure_risk_proba >= high_proba_min or predicted_duration_min >= high_dur_min:
         tier = "HIGH"
     elif closure_risk_proba >= med_proba_min or predicted_duration_min >= med_dur_min:
@@ -73,18 +70,18 @@ def recommend_resources(
     else:
         tier = "LOW"
 
-    # ---- base manpower ----
+    # base manpower
     manpower: int = int(manpower_map.get(tier, 1))
 
-    # ---- peak-hour bonus ----
+    # peak-hour bonus
     if is_peak_hour:
         manpower += peak_bonus
 
-    # ---- crowd-event bonus ----
+    # crowd-event bonus
     if event_cause.lower() in crowd_causes:
         manpower += crowd_bonus
 
-    # ---- barricade units ----
+    # barricade units
     if tier == "HIGH":
         if requires_closure_pred:
             # Full road closure: maximum barricades
@@ -97,10 +94,10 @@ def recommend_resources(
     else:
         barricades = int(barricade_map.get("LOW", 0))
 
-    # ---- barricading strategy text ----
+    # barricading strategy text
     barricading = _barricading_text(tier, requires_closure_pred, barricades, event_cause)
 
-    # ---- diversion plan text ----
+    # diversion plan text
     diversion_plan = _diversion_text(tier, requires_closure_pred, event_cause, predicted_duration_min)
 
     return {
@@ -111,10 +108,7 @@ def recommend_resources(
         "diversion_plan": diversion_plan,
     }
 
-
-# ---------------------------------------------------------------------------
 # Text generation helpers
-# ---------------------------------------------------------------------------
 
 def _barricading_text(
     tier: str,
@@ -144,7 +138,6 @@ def _barricading_text(
             "No barricades required at this time. Monitor situation; "
             "deploy cones if the event escalates."
         )
-
 
 _DIVERSION_TEMPLATES: Dict[str, str] = {
     "accident": (
@@ -198,7 +191,6 @@ _DIVERSION_TEMPLATES: Dict[str, str] = {
         "Display construction-ahead advisory boards 500 m upstream."
     ),
 }
-
 
 def _diversion_text(
     tier: str,
