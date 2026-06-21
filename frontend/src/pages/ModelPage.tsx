@@ -11,8 +11,6 @@ import {
   LineChart,
   Line,
   ReferenceLine,
-  ScatterChart,
-  Scatter,
   Cell,
 } from 'recharts'
 import { Brain, TrendingUp, Award, AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
@@ -145,7 +143,7 @@ export default function ModelPage() {
   const rocData = m.roc_points ?? []
   const diagData = [{ fpr: 0, tpr: 0 }, { fpr: 1, tpr: 1 }]
 
-  const scatterData = m.predicted_vs_actual_sample ?? []
+
 
   return (
     <div className="min-h-screen pt-16">
